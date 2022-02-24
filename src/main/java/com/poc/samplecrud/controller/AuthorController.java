@@ -1,35 +1,67 @@
 package com.poc.samplecrud.controller;
 
 import com.poc.samplecrud.dto.AuthorRequestDto;
+import com.poc.samplecrud.dto.ResponseDto;
 import com.poc.samplecrud.service.AuthorOperationsService;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@AllArgsConstructor
 @RequestMapping("/api/authors")
 public class AuthorController {
 
-    private final AuthorOperationsService authorOperationsService;
+    @Autowired
+    private AuthorOperationsService authorOperationsService;
+    private static final String ERROR = "ERROR";
+    private static final String NOTFOUND = "NOT FOUND";
 
-    @GetMapping({"/get/{id}", "/get"})
-    public ResponseEntity<?> getAuthors(@PathVariable(required = false) String id) {
-        return authorOperationsService.getAuthors(id);
+    @GetMapping("/")
+    public ResponseEntity<ResponseDto> getAuthors() {
+        ResponseDto dto = authorOperationsService.getAuthors();
+        if(dto.getStatus().equals(ERROR))
+            return new ResponseEntity<>(dto, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @PostMapping("/update/{id}")
-    public ResponseEntity<?> updateAuthor(@PathVariable String id, @RequestBody AuthorRequestDto dto) {
-        return authorOperationsService.updateAuthor(id, dto);
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseDto> getAuthor(@PathVariable() String id) {
+        ResponseDto dto = authorOperationsService.getAuthor(id);
+        if(dto.getStatus().equals(ERROR))
+            return new ResponseEntity<>(dto, HttpStatus.INTERNAL_SERVER_ERROR);
+        if(dto.getStatus().equals(NOTFOUND))
+            return new ResponseEntity<>(dto, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createAuthor(@RequestBody AuthorRequestDto dto) {
-        return authorOperationsService.createAuthor(dto);
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponseDto> updateAuthor(@PathVariable String id, @RequestBody AuthorRequestDto author) {
+        ResponseDto dto = authorOperationsService.updateAuthor(id, author);
+        if(dto.getStatus().equals(ERROR))
+            return new ResponseEntity<>(dto, HttpStatus.INTERNAL_SERVER_ERROR);
+        if(dto.getStatus().equals(NOTFOUND))
+            return new ResponseEntity<>(dto, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteAuthor(@PathVariable String id) {
-        return authorOperationsService.deleteAuthor(id);
+    @PostMapping("/")
+    public ResponseEntity<ResponseDto> createAuthor(@RequestBody AuthorRequestDto author) {
+        ResponseDto dto = authorOperationsService.createAuthor(author);
+        if(dto.getStatus().equals(ERROR))
+            return new ResponseEntity<>(dto, HttpStatus.INTERNAL_SERVER_ERROR);
+        if(dto.getStatus().equals(NOTFOUND))
+            return new ResponseEntity<>(dto, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseDto> deleteAuthor(@PathVariable String id) {
+        ResponseDto dto = authorOperationsService.deleteAuthor(id);
+        if(dto.getStatus().equals(ERROR))
+            return new ResponseEntity<>(dto, HttpStatus.INTERNAL_SERVER_ERROR);
+        if(dto.getStatus().equals(NOTFOUND))
+            return new ResponseEntity<>(dto, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 }
